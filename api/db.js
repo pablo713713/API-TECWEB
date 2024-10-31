@@ -32,6 +32,7 @@ function createEnvelope(envelopeObject) {
 
 function addEnvelopeToDatabase(envelopeObject) {
     envelopesObjects.push(createEnvelope(envelopeObject));
+    return envelopesObjects[envelopesObjects.length - 1];
 }
 
 function getEnvelopeById(id) {
@@ -41,3 +42,47 @@ function getEnvelopeById(id) {
 function getAllEnvelopes() {
     return envelopesObjects;
 }
+
+function deleteEnvelopeById(id) {
+    const index = envelopesObjects.findIndex(envelope => envelope.id === id);
+    if (index !== -1) {
+        envelopesObjects.splice(index, 1);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function updateEnvelopeById(id, envelopeObject) {
+    const index = envelopesObjects.findIndex(envelope => envelope.id === id);
+    if (index !== -1) {
+        envelopesObjects[index] = Object.assign(envelopesObjects[index], envelopeObject);
+        return envelopesObjects[index];
+    } else {
+        return false;
+    }
+}
+
+function makeTransaction(envelopeId, envelopeObject) {
+    const envelope = getEnvelopeById(envelopeId);
+    if (envelope) {
+        envelope.transactions.push({
+            date: new Date(),
+            amount: envelopeObject.spent,
+            description: envelopeObject.description
+        });
+        envelope.spent += envelopeObject.spent;
+        return envelope;
+    } else {
+        return false;
+    }
+}
+
+module.exports = {
+    addEnvelopeToDatabase,
+    getEnvelopeById,
+    getAllEnvelopes,
+    deleteEnvelopeById,
+    updateEnvelopeById,
+    makeTransaction
+};
