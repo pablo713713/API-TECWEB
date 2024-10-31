@@ -31,3 +31,40 @@ Este proyecto permite a los usuarios organizar su presupuesto personal a través
    ```bash
    git clone https://github.com/pruden96/personal-budget-api.git
    cd personal-budget-api
+   
+## Documentación de la API
+### Endpoints
+- **GET /api/envelopes**: Obtiene todos los sobres.
+- **GET /api/envelopes/:id**: Obtiene un sobre específico por ID.
+- **POST /api/envelopes**: Crea un nuevo sobre. Requiere `name` y `limit`.
+  - **Ejemplo de solicitud JSON**:
+    ```json
+    {
+      "name": "Utilities",
+      "limit": 300
+    }
+    ```
+- **PUT /api/envelopes/:id**: Actualiza un sobre o registra una transacción. Si incluye `spent` y `description`, registra una transacción; de lo contrario, actualiza el sobre.
+  - **Ejemplo de solicitud JSON para transacción**:
+    ```json
+    {
+      "spent": 50,
+      "description": "Electric bill"
+    }
+    ```
+  - **Ejemplo de solicitud JSON para actualización de sobre**:
+    ```json
+    {
+      "name": "Groceries",
+      "limit": 400
+    }
+    ```
+
+Cada solicitud se maneja en el archivo `envelopes.js` mediante la integración de `Express.js` y un sistema modular para la base de datos en `db.js` que simula una base de datos en memoria con sobres predefinidos.
+
+## Contribuciones
+Si deseas contribuir, por favor, abre un issue o envía un pull request con una breve descripción de los cambios que propones.
+
+## Licencia
+Este proyecto está licenciado bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
