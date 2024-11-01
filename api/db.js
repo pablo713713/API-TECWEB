@@ -1,4 +1,5 @@
 let envelopeId = 0;
+let transactionId = 0;
 
 const envelopesObjects = [
     createEnvelope({name: "Food", limit: 200}),
@@ -6,9 +7,14 @@ const envelopesObjects = [
     createEnvelope({name: "Tools", limit: 500})
 ];
 
-function generateId() {
-    envelopeId++;
-    return envelopeId;
+function generateId(type) {
+    if (type == 'envelope') {
+        envelopeId++;
+        return envelopeId;
+    } else if(type == 'transaction') {
+        transactionId++;
+        return transactionId;
+    }
 }
 
 /**
@@ -26,7 +32,7 @@ function createEnvelope(envelopeObject) {
             return this.limit - this.spent;
         },
         transactions: [],
-        id: generateId()
+        id: generateId('envelope')
     };
 }
 
@@ -36,46 +42,88 @@ function addEnvelopeToDatabase(envelopeObject) {
 }
 
 function getEnvelopeById(id) {
-    return envelopesObjects.find(envelope => envelope.id === id);
+    const envelopeFound = envelopesObjects.find(envelope => envelope.id === id);
+    if (envelopeFound) {
+        return envelopeFound;
+    } else {
+        throw new Error(`404: Envelope with ID:${id} not found!`);
+    }
 }
 
+function getTransactionIndexById(envelope, id) {
+    const transactionIndex = envelope.transactions.findIndex(transac => transac.id === id);
+    if (transactionIndex !== -1) {
+        return transactionIndex;
+    } else {
+        throw new Error(`404: Transaction with ID:${id} not found in ${envelope.name} envelope!`);
+    }
+}
+
+
 function getAllEnvelopes() {
-    return envelopesObjects;
+    if (envelopesObjects) {
+        return envelopesObjects;
+    } else {
+        throw new Error(`404: Not found! Evelopes are empty`);
+    }
+    
 }
 
 function deleteEnvelopeById(id) {
     const index = envelopesObjects.findIndex(envelope => envelope.id === id);
-    if (index !== -1) {
-        envelopesObjects.splice(index, 1);
-        return true;
-    } else {
-        return false;
-    }
+    const objectToDelete = envelopesObjects[index];
+    envelopesObjects.splice(index, 1);
+    return objectToDelete;
 }
 
 function updateEnvelopeById(id, envelopeObject) {
     const index = envelopesObjects.findIndex(envelope => envelope.id === id);
-    if (index !== -1) {
-        envelopesObjects[index] = Object.assign(envelopesObjects[index], envelopeObject);
-        return envelopesObjects[index];
+    envelopesObjects[index] = Object.assign(envelopesObjects[index], envelopeObject);
+    return envelopesObjects[index];
+}
+
+function validateTransaction(envelopeObject, transaction) {
+    if (transaction.amount + envelopeObject.spent <= envelopeObject.limit) {
+        return true;
     } else {
-        return false;
+        throw new Error(`403: Transaction exceeds budget limit`);
     }
 }
 
-function makeTransaction(envelopeId, envelopeObject) {
+function makeTransaction(envelopeId, transaction) {
     const envelope = getEnvelopeById(envelopeId);
-    if (envelope) {
+    validateTransaction(envelope, transaction);
+    if (transaction.date && transaction.id) {
+        envelope.transactions.push({
+            ...transaction,
+        });
+    } else {
         envelope.transactions.push({
             date: new Date(),
-            amount: envelopeObject.spent,
-            description: envelopeObject.description
+            ...transaction,
+            id: generateId('transaction')
         });
-        envelope.spent += envelopeObject.spent;
-        return envelope;
-    } else {
-        return false;
     }
+    envelope.spent += transaction.amount;
+    return envelope;
+}
+
+function deleteTransactionById(envelopeId, transactionId) {
+    const envelope = getEnvelopeById(envelopeId);
+    const transactionIndex = getTransactionIndexById(envelope, transactionId);
+    const amountToRestitute = envelope.transactions[transactionIndex].amount;
+    envelope.spent -= amountToRestitute;
+    envelope.transactions.splice(transactionIndex, 1);
+    return true;
+}
+
+function moveTransaction(sourceObjectId, targetObjectId, transactionId) {
+    const sourceEnvelope = getEnvelopeById(sourceObjectId);
+    const transactionIndex = getTransactionIndexById(sourceEnvelope, transactionId);
+    const transaction = sourceEnvelope.transactions[transactionIndex];
+    const uptadetedEnvelope = makeTransaction(targetObjectId, transaction);
+    deleteTransactionById(sourceObjectId, transactionId)
+    return uptadetedEnvelope;
 }
 
 module.exports = {
@@ -84,5 +132,8 @@ module.exports = {
     getAllEnvelopes,
     deleteEnvelopeById,
     updateEnvelopeById,
-    makeTransaction
+    makeTransaction,
+    deleteTransactionById,
+    getTransactionIndexById,
+    moveTransaction
 };
