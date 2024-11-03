@@ -44,21 +44,49 @@ Este proyecto permite a los usuarios organizar su presupuesto personal a través
       "limit": 300
     }
     ```
-- **PUT /api/envelopes/:id**: Actualiza un sobre o registra una transacción. Si incluye `spent` y `description`, registra una transacción; de lo contrario, actualiza el sobre.
+- **POST /api/envelopes/:id**: Registra una transacción. Requiere `amount` y `description`.
   - **Ejemplo de solicitud JSON para transacción**:
     ```json
     {
-      "spent": 50,
+      "amount": 50,
       "description": "Electric bill"
     }
     ```
-  - **Ejemplo de solicitud JSON para actualización de sobre**:
+- **PUT /api/envelopes/:id**: Actualiza un sobre. Requiere `name` y `limit`.
+  - **Ejemplo de solicitud JSON**:
     ```json
     {
-      "name": "Groceries",
-      "limit": 400
+      "name": "Entretaiment",
+      "limit": 1300
     }
     ```
+- **PUT /api/envelopes/:id/transactions/:transactionId/:targetId**: Mueve una transacción de un sobre fuente a un sobre destino.
+  - **Ejemplo de respuesta JSON**:
+    ```json
+    {
+      "name": "Entretaiment",
+      "limit": 1300,
+      "spent": 500,
+      "balance": 800,
+      "transactions": [<NEW_TRANSACTION>]
+    }
+    ```
+
+- **DELETE /api/envelopes/:id**: Elimina un sobre.
+  - **Ejemplo de respuesta JSON**:
+    ```json
+    {
+      "name": <envelope's_name>,
+      "status": "DELETED"
+      "Date": <DATE> 
+    }
+    ```
+- **DELETE /api/envelopes/:id/transactions/:transactionId**: Elimina una transacción de un sobre.
+  - **Ejemplo de respuesta**:
+    STATUS: 204
+
+
+  
 
 Cada solicitud se maneja en el archivo `envelopes.js` mediante la integración de `Express.js` y un sistema modular para la base de datos en `db.js` que simula una base de datos en memoria con sobres predefinidos.
 
