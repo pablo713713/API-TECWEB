@@ -52,6 +52,15 @@ Este proyecto permite a los usuarios organizar su presupuesto personal a través
       "description": "Electric bill"
     }
     ```
+   - **Una transacción tiene la forma JSON:**:
+    ```json
+    {
+      "amount": 50,
+      "description": "Electric bill"
+      "date": <DATE>
+      "id": <id>
+    }
+    ```
 - **PUT /api/envelopes/:id**: Actualiza un sobre. Requiere `name` y `limit`.
   - **Ejemplo de solicitud JSON**:
     ```json
