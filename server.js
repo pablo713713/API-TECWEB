@@ -15,6 +15,6 @@ app.use('/api/envelopes', envelopesRouter);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-    const baseUrl = `http://192.168.3.11:${PORT}`; // Cambia 'localhost' por tu IP si es necesario
+    const baseUrl = `http://localhost:${PORT}`; // Cambia 'localhost' por tu IP si es necesario
     console.log(`Server is listening on ${baseUrl}`);
 });
